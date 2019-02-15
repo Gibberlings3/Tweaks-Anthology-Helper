@@ -1,0 +1,113 @@
+BACKUP ~cdtweaks_helper/backup~ // location to store files for
+AUTHOR ~pcamagna@yahoo.com~ // email address displayed if install fails
+
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////                                                  \\\\\
+///// generate armor list                              \\\\\
+/////                                                  \\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+
+BEGIN ~generate armor list for Tweaks Anthology~
+NO_LOG_RECORD
+
+COPY ~cdtweaks_helper/email_to_cam/master.log~   ~override~ // from TA v8
+     ~cdtweaks_helper/email_to_cam/descript.log~ ~override~
+     ~weidu.log~ ~cdtweaks_helper/email_to_cam~
+
+COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
+  READ_SHORT 0x1c type  ELSE 0
+  READ_BYTE  0x18 flags ELSE 0
+  PATCH_IF (((type = 2) OR (type = 12)) AND ((flags & BIT2) = BIT2) AND       // droppable armor/shield that's
+            (!FILE_CONTAINS_EVALUATED (~master.log~ ~^%SOURCE_RES% ~))) BEGIN // not already in the list
+    WRITE_SHORT 0x1c 0 // make an arbitrary change to force the copy
+    READ_LONG 0x0c valid
+    PATCH_IF (valid < 2147483646) AND (valid >= 0) BEGIN
+      READ_STRREF 0x08 name_gen ELSE ""
+      READ_STRREF 0x0c name
+    END ELSE BEGIN
+      READ_STRREF 0x08 name ELSE "no name"
+      SPRINT "name_gen" ""
+    END
+    READ_LONG 0x54 valid
+    PATCH_IF (valid < 2147483646) AND (valid >= 0) BEGIN
+      READ_STRREF 0x50 desc_gen ELSE ""
+      READ_STRREF 0x54 desc
+    END ELSE BEGIN
+      READ_STRREF 0x50 desc ELSE "no desc"
+      SPRINT "desc_gen" ""
+    END
+    READ_ASCII 0x22 icon (2)
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "2A" = 0) BEGIN
+      SPRINT "appear" "Leather armor"
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "3A" = 0) BEGIN
+      SPRINT "appear" "Chain mail"
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "4A" = 0) BEGIN
+      SPRINT "appear" "Plate mail"
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_REGEXP "[234]W" = 0) BEGIN
+      SPRINT "appear" "Robe"
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D1" = 0) BEGIN
+      SPRINT "appear" "Buckler"
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D2" = 0) BEGIN
+      SPRINT "appear" "Small shield"
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D3" = 0) BEGIN
+      SPRINT "appear" "Medium shield"
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D4" = 0) BEGIN
+      SPRINT "appear" "Large/Tower shield"
+    END ELSE BEGIN
+      SPRINT "appear" "Unknown"
+    END
+    READ_LONG  0x6a fx_off
+    READ_SHORT 0x70 fx_num
+    SPRINT stlth  "Yes"
+    SPRINT thving "Yes"
+    SPRINT arcne  "Yes"
+    FOR (index = 0 ; index < fx_num ; ++index) BEGIN
+      READ_SHORT (fx_off +        (index * 0x30)) opcode
+      READ_LONG  (fx_off + 0x08 + (index * 0x30)) button
+      PATCH_IF ((opcode = 144) AND (button = 0)) BEGIN
+        SPRINT stlth  "No"
+      END
+      PATCH_IF ((opcode = 144) AND (button = 1)) BEGIN
+        SPRINT thving  "No"
+      END
+      PATCH_IF ((opcode = 145) AND (button = 0)) BEGIN
+        SPRINT arcne  "No"
+      END
+    END
+    INNER_ACTION BEGIN
+
+APPEND ~master.log~ ~%SOURCE_RES% ~
+APPEND ~descript.log~
+"%MNL%%LNL%%WNL% %MNL%%LNL%%WNL%
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+  ~%SOURCE_RES%~ => 10000 // %name% (%name_gen%)
+Equipped appearance: %appear%
+Cast arcane? %arcne%  
+Stealth? %stlth%  
+Thieving? %thving%
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+%MNL%%LNL%%WNL% %MNL%%LNL%%WNL%
+%desc% 
+%MNL%%LNL%%WNL% %MNL%%LNL%%WNL%"
+    END
+  END
+  BUT_ONLY
+
+MOVE ~override/master.log~   ~cdtweaks_helper/email_to_cam/master.log~
+MOVE ~override/descript.log~ ~cdtweaks_helper/email_to_cam/descript.log~
+
+PRINT ~Please zip/rar the contents of the email_to_cam folder, located
+inside the cdtweaks_helper folder, to pcamagna@yahoo.com.
+
+Thanks!~
