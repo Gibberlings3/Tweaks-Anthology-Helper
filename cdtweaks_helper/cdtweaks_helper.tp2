@@ -16,6 +16,11 @@ COPY ~cdtweaks_helper/email_to_cam/master.log~   ~override~ // from TA v8
      ~cdtweaks_helper/email_to_cam/descript.log~ ~override~
      ~weidu.log~ ~cdtweaks_helper/email_to_cam~
 
+ACTION_IF FILE_EXISTS ~Weidu-BGEE.log~  // EET
+BEGIN
+    COPY ~Weidu-BGEE.log~ ~cdtweaks_helper/email_to_cam~
+END
+
 COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
   READ_SHORT 0x1c type  ELSE 0
   READ_BYTE  0x18 flags ELSE 0
