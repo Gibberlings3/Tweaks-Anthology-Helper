@@ -1,6 +1,8 @@
 BACKUP ~cdtweaks_helper/backup~ // location to store files for
 AUTHOR ~pcamagna@yahoo.com~ // email address displayed if install fails
 
+VERSION ~v2021.10.20~
+
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////                                                  \\\\\
@@ -12,31 +14,74 @@ AUTHOR ~pcamagna@yahoo.com~ // email address displayed if install fails
 BEGIN ~generate armor list for Tweaks Anthology~
 NO_LOG_RECORD
 
-COPY ~cdtweaks_helper/email_to_cam/master.log~   ~override~ // from TA v8
-     ~cdtweaks_helper/email_to_cam/descript.log~ ~override~
-     ~weidu.log~ ~cdtweaks_helper/email_to_cam~
+<<<<<<<<./inline/descript.log
+>>>>>>>>
 
+ACTION_IF FILE_EXISTS ~cdtweaks/2da/common_armor_list.2da~ BEGIN
+
+  COPY ~cdtweaks/2da/common_armor_list.2da~ ~cdtweaks_helper/email_to_cam/common_armor_list.2da~
+  
+END  
+
+ACTION_IF FILE_EXISTS ~weidu-bgee.log~ BEGIN
+
+  COPY ~weidu-bgee.log~ ~cdtweaks_helper/email_to_cam/weidu-bgee.log~
+  
+END  
+
+COPY ~weidu.log~             ~cdtweaks_helper/email_to_cam/weidu.log~
+     ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/descript.log~
+     ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/install.tpa~
+
+COPY ~cdtweaks_helper/email_to_cam/common_armor_list.2da~ ~cdtweaks_helper/email_to_cam/common_armor_list.2da~
+  COUNT_2DA_ROWS 11 rows
+  FOR (row = 1 ; row < rows ; ++row) BEGIN
+    READ_2DA_ENTRY row 0 11 item
+    TO_LOWER item
+    SET $armor("%item%") = 1
+  END  
+  REPLACE_TEXTUALLY ~^\([^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]*\)$~ ~\1 ****~
+  PRETTY_PRINT_2DA
+
+  REPLACE_EVALUATE 
+    ~^\([^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+\)\(.+\)$~
+    BEGIN
+      INNER_PATCH_SAVE MATCH2 ~%MATCH2%~ BEGIN
+        REPLACE_TEXTUALLY ~ +~ ~ ~
+      END
+   END ~%MATCH1%%MATCH2%~    
+
+OUTER_SET email = 0
 COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
   READ_SHORT 0x1c type  ELSE 0
   READ_BYTE  0x18 flags ELSE 0
-  PATCH_IF (((type = 2) OR (type = 12)) AND ((flags & BIT2) = BIT2) AND       // droppable armor/shield that's
-            (!FILE_CONTAINS_EVALUATED (~master.log~ ~^%SOURCE_RES% ~))) BEGIN // not already in the list
-    WRITE_SHORT 0x1c 0 // make an arbitrary change to force the copy
+  SPRINT item ~%SOURCE_RES%~
+  TO_LOWER item
+  PATCH_IF (((type = 2) OR (type = 12)) AND            // type is armor or shield
+            ((flags & BIT2) = BIT2)     AND            // is flagged as droppable
+            (!VARIABLE_IS_SET $armor("%item%"))) BEGIN // not already in the list
+            
+    SET email = 1
+    WRITE_SHORT 0x1c THIS + 100 // make an arbitrary change to force the copy
+    SET name_spc_exists = 0
     READ_LONG 0x0c valid
     PATCH_IF (valid < 2147483646) AND (valid >= 0) BEGIN
       READ_STRREF 0x08 name_gen ELSE ""
-      READ_STRREF 0x0c name
+      READ_STRREF 0x0c name_spc
+      SET name_spc_exists = 1
     END ELSE BEGIN
-      READ_STRREF 0x08 name ELSE "no name"
-      SPRINT "name_gen" ""
+      READ_STRREF 0x08 name_gen ELSE "no name"
+      SPRINT name_spc ""
     END
+    SET desc_spc_exists = 0
     READ_LONG 0x54 valid
     PATCH_IF (valid < 2147483646) AND (valid >= 0) BEGIN
       READ_STRREF 0x50 desc_gen ELSE ""
-      READ_STRREF 0x54 desc
+      READ_STRREF 0x54 desc_spc
+      SET desc_spc_exists = 1
     END ELSE BEGIN
-      READ_STRREF 0x50 desc ELSE "no desc"
-      SPRINT "desc_gen" ""
+      READ_STRREF 0x50 desc_gen ELSE "no desc"
+      SPRINT desc_spc ""
     END
     READ_ASCII 0x22 icon (2)
     PATCH_IF ("%icon%" STRING_COMPARE_CASE "2A" = 0) BEGIN
@@ -85,29 +130,81 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
     END
     INNER_ACTION BEGIN
 
-APPEND ~master.log~ ~%SOURCE_RES% ~
-APPEND ~descript.log~
-"%MNL%%LNL%%WNL% %MNL%%LNL%%WNL%
+APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~
+"%WNL%%WNL%
+COPY ~cdtweaks_helper/email_to_cam/%item%.itm~ ~override~
+  WRITE_SHORT 0x1c THIS - 100 // undo arbitrary change
+  SAY 0x08 ~%name_gen%~
+  SAY 0x50 ~%desc_gen%~"
+ACTION_IF name_spc_exists BEGIN APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~ "  SAY 0x0c ~%name_spc%~" END ELSE BEGIN 
+                                APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~ ~  WRITE_LONG 0x0c "-1"~ END
+ACTION_IF desc_spc_exists BEGIN APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~ "  SAY 0x54 ~%desc_spc%~" END ELSE BEGIN 
+                                APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~ ~  WRITE_LONG 0x54 "-1"~ END
+  
+APPEND_OUTER ~cdtweaks_helper/email_to_cam/descript.log~
+"%WNL%%WNL%
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
-  ~%SOURCE_RES%~ => 10000 // %name% (%name_gen%)
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+  ~%item%~ => 10000 // %name_spc% (%name_gen%)
 Equipped appearance: %appear%
 Cast arcane? %arcne%  
 Stealth? %stlth%  
 Thieving? %thving%
+%WNL%
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+%WNL%
+%desc_spc% 
+%WNL%
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
-%MNL%%LNL%%WNL% %MNL%%LNL%%WNL%
-%desc% 
-%MNL%%LNL%%WNL% %MNL%%LNL%%WNL%"
-    END
+%WNL%
+%desc_gen%
+%WNL%"
+
+    END // end inner_action
   END
   BUT_ONLY
 
-MOVE ~override/master.log~   ~cdtweaks_helper/email_to_cam/master.log~
-MOVE ~override/descript.log~ ~cdtweaks_helper/email_to_cam/descript.log~
+ACTION_IF email BEGIN
+  PRINT 
+~
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 
-PRINT ~Please zip/rar the contents of the email_to_cam folder, located
-inside the cdtweaks_helper folder, to pcamagna@yahoo.com.
+New items were found! Please zip/rar the contents of the email_to_cam 
+folder, located inside the cdtweaks_helper folder, to pcamagna@yahoo.com.
 
-Thanks!~
+Thanks!
+
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\~
+
+END ELSE BEGIN
+
+PRINT
+~
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+
+No new items found! Thanks for running the tool; all of the items found
+are already covered by Tweaks Anthology. No further action is necessary.
+
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\~
+
+END
+
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////                                                  \\\\\
+///// for cam to test these locally                    \\\\\
+/////                                                  \\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
+
+//BEGIN ~Cam installs locally~
+//INCLUDE ~cdtweaks/email_to_cam/install.tpa~
