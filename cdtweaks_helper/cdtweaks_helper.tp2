@@ -19,7 +19,19 @@ NO_LOG_RECORD
 
 ACTION_IF FILE_EXISTS ~cdtweaks/2da/common_armor_list.2da~ BEGIN
 
-  COPY ~cdtweaks/2da/common_armor_list.2da~ ~cdtweaks_helper/email_to_cam/common_armor_list.2da~
+  OUTER_SET tweaks_version = 0 
+  COPY ~cdtweaks/setup-cdtweaks.tp2~ ~cdtweaks_helper/setup-cdtweaks.txt~ // nothing should change, but still
+    REPLACE_EVALUATE "^\(VERSION ~[Vv]?\)\([0-9]+\)" BEGIN
+      SET tweaks_version = MATCH2
+    END ~%MATCH1%%MATCH2%~  
+    PATCH_PRINT ~version is %tweaks_version%~
+    BUT_ONLY
+    
+  ACTION_IF tweaks_version > 9 BEGIN
+
+    COPY ~cdtweaks/2da/common_armor_list.2da~ ~cdtweaks_helper/email_to_cam/common_armor_list.2da~
+    
+  END  
   
 END  
 
