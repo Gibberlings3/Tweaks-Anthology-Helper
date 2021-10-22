@@ -1,5 +1,6 @@
 ITEM              OLD_CLASS         APPEARANCE        PENALTY_MISCAST   PENALTY_PICK      PENALTY_LOCKS     PENALTY_TRAPS     PENALTY_MOVE      PENALTY_HIDE      PENALTY_STEALTH   NOTES
 #lsrvarm          209               plate_full        35                95                80                80                95                95                95                Sarevok's Plate Mail Armor
+#vankh            102               shield_medium     15                255               255               255               255               255               255               unknown
 60chancd          400               chain             0                 0                 255               255               0                 0                 0                 chain of drakkas' fury (regular chain, per descript, no thieving or casting penalties)
 _chan01           203               chain             30                40                15                15                40                30                30                chainmail armor
 _chan02           203               chain             30                40                15                15                40                30                30                chainmail +1
@@ -71,6 +72,15 @@ a!bleat1          301               leather_studded   0                 30      
 a!bleat2          301               leather_studded   0                 30                10                10                20                20                20                bardic leathers +1
 a!brsb            100               shield_buckler    5                 255               255               255               255               255               255               skald's battered buckler
 a!brtr            010               shield_special    0                 255               255               255               255               255               255               tress of jessecyl
+a7#leat1          202               hide              20                60                50                50                30                20                20                Spirit Guide +4 (Hide Armor)
+a7_shld4          100               shield_buckler    5                 255               255               255               255               255               255               Grumbar's Defense +1 (Buckler)
+a7_shld5          100               shield_buckler    5                 255               255               255               255               255               255               Grumbar's Defense +2 (Buckler)
+a7_shld6          100               shield_buckler    5                 255               255               255               255               255               255               Grumbar's Defense +2 (Buckler)
+a7_shld7          100               shield_buckler    5                 255               255               255               255               255               255               Grumbar's Defense +2 (Buckler)
+a7_shldc          100               shield_buckler    5                 255               255               255               255               255               255               Grumbar's Defense +2 (Buckler)
+a7_shldd          100               shield_buckler    5                 255               255               255               255               255               255               Grumbar's Defense +2 (Buckler)
+a7_shlde          100               shield_buckler    5                 255               255               255               255               255               255               Grumbar's Defense +2 (Buckler)
+a7_shldf          100               shield_buckler    5                 255               255               255               255               255               255               Grumbar's Defense +3 (Buckler)
 aaitm106          209               plate_full        35                95                80                80                95                95                95                experimental exo armor
 aaitm107          304               chain_elven       0                 20                5                 5                 10                10                10                drow adamantine chain +5
 aaitm108          209               plate_full        35                95                80                80                95                95                95                elaborate drow full plate armor +5
@@ -86,6 +96,8 @@ aaitm164          201               leather_studded   15                30      
 aaitm174          209               plate_full        35                95                80                80                95                95                95                armor of the frost +3
 aaitm178          001               robe              255               255               255               255               255               255               255               robe of vecna
 aashrarm          203               chain             30                40                15                15                40                30                30                darkmail +3
+ac_wchan          203               chain             30                40                15                15                40                30                30                Silver chain mail 
+acclck01          001               robe              255               255               255               255               255               255               255               Borsk's magic robe 
 accshld           102               shield_medium     15                255               255               255               255               255               255               holy shield of tempus
 acq17003          102               shield_medium     15                255               255               255               255               255               255               Mirror Shield +1 (Medium Shield)
 acq18002          201               leather_studded   15                30                10                10                20                20                20                Orc Leather +3 (Studded Leather)
@@ -184,6 +196,14 @@ c!gplate          209               plate_full        35                95      
 c#ajshl2          102               shield_medium     15                255               255               255               255               255               255               ilvastarr family shield +2
 c#ajshl3          102               shield_medium     15                255               255               255               255               255               255               ilvastarr family shield +4
 c#ajshld          102               shield_medium     15                255               255               255               255               255               255               ilvastarr family shield +1
+c#br0005          001               robe              255               255               255               255               255               255               255               Brandocks Mantel 
+c#grarm1          201               leather_studded   15                30                10                10                20                20                20                Studded leather doublet for war dogs +1 
+c#grarm2          203               chain             30                40                15                15                40                30                30                This is armor for dogs of war. 
+c#grarm3          208               plate             40                75                40                40                80                75                75                War Dog Plate Armor +1 
+c#grarm4          209               plate_full        35                95                80                80                95                95                95                Splendid armor for dogs of war (allows thieving, but seems like an oversight)
+c#grarm5          208               plate             40                75                40                40                80                75                75                Gray's Ankheg Plate
+c#grarm6          209               plate_full        35                95                80                80                95                95                95                War Dog's Full Plate Mail +2
+c#stsrva          209               plate_full        35                95                80                80                95                95                95                Sarevok's armor 
 c02plat           209               plate_full        35                95                80                80                95                95                95                Abyssal Plate Armor (Full Plate Armor)
 c0sleat           202               hide              20                70                60                60                40                30                30                Hair Shirt of Ilmater (Hide Armor) - hide armor plus an additional 10% penalty to thieving
 c0srobe           001               robe              255               255               255               255               255               255               255               Robes of the Unfettered (Mage Robe)
@@ -321,6 +341,7 @@ clck16            001               robe              255               255     
 clck17            001               robe              255               255               255               255               255               255               255               robe of the evil archmagi
 clck18            001               robe              255               255               255               255               255               255               255               knave's robe; also robe of acid resistance
 clck19            001               robe              255               255               255               255               255               255               255               robe of the good archmagi
+clck1mod          001               robe              255               255               255               255               255               255               255               Rob Devyatki Nevervinter 
 clck29            001               robe              255               255               255               255               255               255               255               robe of the apprenti
 clckk1            001               robe              255               255               255               255               255               255               255               osan's monk robe
 clckk2            001               robe              255               255               255               255               255               255               255               osan's monk robe
@@ -407,6 +428,7 @@ coma11            208               plate             40                75      
 coms01            102               shield_medium     15                255               255               255               255               255               255               shield of valor +3
 coms02            102               shield_medium     15                255               255               255               255               255               255               menacar's shield +3
 cota              304               chain_elven       0                 20                5                 5                 10                10                10                harmony
+critm013          102               shield_medium     15                255               255               255               255               255               255               Polished Chrome Shield +2
 cushld01          101               shield_small      5                 255               255               255               255               255               255               cuchoinneach's small shield +3 (iegmc ntotsc)
 cushld03          102               shield_medium     15                255               255               255               255               255               255               medium shield +1 (iegmc ntotsc)
 cvmidshi          104               shield_large      50                255               255               255               255               255               255               Midnight's Shelter (White Mythril Shield)
@@ -590,7 +612,9 @@ dsthrarm          201               leather_studded   15                30      
 dswrkarm          201               leather_studded   15                30                10                10                20                20                20                stormcloud 'kraken's bane'
 durobe            001               robe              255               255               255               255               255               255               255               battlemage's robe
 dustrobe          001               robe              255               255               255               255               255               255               255               dustman robes (pst)
+dvclck01          001               robe              255               255               255               255               255               255               255               Robe of Acid Resistance
 dvplat            020               special           255               255               255               255               255               255               255               i found them, but did not wish to free them.
+dvshld01          101               shield_small      5                 255               255               255               255               255               255               Nature's Ward +2
 dw#abyda          205               scale             25                50                20                20                60                50                50                yellow dragon scale armor
 dwchan01          304               chain_elven       0                 20                5                 5                 10                10                10                drow elven chain +3
 dwchan02          304               chain_elven       0                 20                5                 5                 10                10                10                drow adamantine chain +5
@@ -626,6 +650,7 @@ f_jarlpl          208               plate             40                75      
 f_mithch          203               chain             30                40                15                15                40                30                30                mithril chain mail +4
 f_opalpl          209               plate_full        35                95                80                80                95                95                95                dark opal plate
 fanrobe           001               robe              255               255               255               255               255               255               255               robe
+farmod            209               plate_full        35                95                80                80                95                95                95                Armor of an award of Paladins of Faerun
 fireshld          102               shield_medium     15                255               255               255               255               255               255               medium shield of fire +3
 flamplat          208               plate             40                75                40                40                80                75                75                plate of smoldering (plate armour)
 flat01            209               plate_full        35                95                80                80                95                95                95                field plate
@@ -660,6 +685,7 @@ gcmch01           304               chain_elven       0                 20      
 gcmpl01           208               plate             40                75                40                40                80                75                75                bathed-in-blood
 gcmsh01           102               shield_medium     15                255               255               255               255               255               255               the argent shield
 gcmsh02           104               shield_large      50                255               255               255               255               255               255               ****
+glamod            208               plate             40                75                40                40                80                75                75                Glatiator armor
 glory             209               plate_full        35                95                80                80                95                95                95                the glory of suffering
 glowchan          203               chain             30                40                15                15                40                30                30                glowing chain mail armor + 4
 gnwml             201               leather_studded   15                30                10                10                20                20                20                gnomish workman's leather +2 (studded leather armour)
@@ -683,6 +709,8 @@ iceplat           208               plate             40                75      
 ichan01           203               chain             30                40                15                15                40                30                30                chain mail armor
 ichan04           206               splint            40                40                15                25                40                30                30                splint mail
 iibwlsh1          102               shield_medium     15                255               255               255               255               255               255               darklight shield
+ij#ctble          200               leather           10                0                 255               255               0                 0                 0                 Shadow Armor
+ij#ctbpl          208               plate             40                75                40                40                80                75                75                Plate Mail Armor
 ileat04           201               leather_studded   15                30                10                10                20                20                20                studded leather armor
 illas04           304               chain_elven       0                 20                5                 5                 10                10                10                ****
 imofurc           001               robe              255               255               255               255               255               255               255               Imoen's Pink Fur Coat (Fur Coat)
@@ -707,6 +735,8 @@ jers              104               shield_large      50                255     
 juschan           203               chain             30                40                15                15                40                30                30                ****
 k0barrel          001               robe              255               255               255               255               255               255               255               barrel
 kaychai           304               chain_elven       0                 20                5                 5                 10                10                10                kaylessa's armor +3 (chain mail)
+kelchan           203               chain             30                40                15                15                40                30                30                Doomguide Chain (allows casting, thieving)
+kev1mod           304               chain_elven       0                 20                5                 5                 10                10                10                Elfin armor of Kevkhorn
 kimchain          304               chain_elven       0                 20                5                 5                 10                10                10                elvish dwarven chain mail
 king              208               plate             40                75                40                40                80                75                75                winter king's plate (hide armour)
 kinplat           209               plate_full        35                95                80                80                95                95                95                kindrek's full plate (full plate armour)
@@ -745,6 +775,8 @@ l#kudddd          102               shield_medium     15                255     
 l#melsh           001               robe              255               255               255               255               255               255               255               Shirt of the Melting Man
 l#nddre           001               robe              255               255               255               255               255               255               255               Mersace's Orange Dress (Mersace's Orange Dress)
 l#ndrob           001               robe              255               255               255               255               255               255               255               Robe of the Faithful Archmagi (Robe)
+l#nila6           001               robe              255               255               255               255               255               255               255               Light From Over the Garden Wall (Lantern)
+l#nini1           304               chain_elven       0                 20                5                 5                 10                10                10                Chains of Purple Scout (Chain Mail)
 l#nsarm           200               leather           10                0                 255               255               0                 0                 0                 Skeleton's Sack +4 (Leather armor)
 l#nsrob           001               robe              255               255               255               255               255               255               255               Robe of the Charismatic Archmagi (Robe)
 l#nssh1           100               shield_buckler    5                 255               255               255               255               255               255               Buckler of the Spider Queen +3 (Buckler)
@@ -792,6 +824,7 @@ leat16            201               leather_studded   15                30      
 leat17            201               leather_studded   15                30                10                10                20                20                20                armor of deep night +4
 leat18            201               leather_studded   15                30                10                10                20                20                20                armor of the viper +5
 leat19            205               scale             25                50                20                20                60                50                50                shadow dragon scale
+leat1mod          200               leather           10                0                 255               255               0                 0                 0                 Armor of the Nine of Nevervinter
 leat20            202               hide              20                60                50                50                30                20                20                aeger's hide +3 (hide armor)
 leat21            200               leather           10                0                 255               255               0                 0                 0                 human flesh +5
 leat22            200               leather           10                0                 255               255               0                 0                 0                 human flesh
@@ -877,9 +910,11 @@ misc58            001               robe              255               255     
 misc99            208               plate             40                75                40                40                80                75                75                plate mail armor
 miscdrw3          001               robe              255               255               255               255               255               255               255               zernan's robe of electrical resistance
 mitharmr          203               chain             30                40                15                15                40                30                30                mithril armor +6
+mitmod            203               chain             30                40                15                15                40                30                30                Mifrilovy armor
 mmplat            020               special           255               255               255               255               255               255               255               i found them, but did not wish to free them.
 mourner           206               splint            40                40                15                25                40                30                30                mourner's armor - already gets -25%, but this imposes worse
 mplat01           208               plate             40                75                40                40                80                75                75                king's plate mail
+mplatmod          209               plate_full        35                95                80                80                95                95                95                Rated sportsman +3
 mwararm           202               hide              20                60                50                50                30                20                20                ariena's armor
 mystery           104               shield_large      50                255               255               255               255               255               255               mystery of the dead +3 (large shield)
 myth003           209               plate_full        35                95                80                80                95                95                95                drenophild wraithmeal
@@ -909,10 +944,12 @@ newsm01           102               shield_medium     15                255     
 newss01           101               shield_small      5                 255               255               255               255               255               255               small shield +3
 newss02           101               shield_small      5                 255               255               255               255               255               255               mendelev's shield +4
 newss03           102               shield_medium     15                255               255               255               255               255               255               shield of hiding +4
+nomzmod           201               leather_studded   15                30                10                10                20                20                20                Armor of nomads
 nparm             001               robe              255               255               255               255               255               255               255               jansen adventurewear
 npchan            203               chain             30                40                15                15                40                30                30                corthala family armor
 npplat            209               plate_full        35                95                80                80                95                95                95                firecam full-plate armor
 npshld            102               shield_medium     15                255               255               255               255               255               255               delryn family shield
+nq#cl08           001               robe              255               255               255               255               255               255               255               Sorin's rogue robe 
 nsshld01          101               shield_small      5                 255               255               255               255               255               255               hermes' shield +1
 nsshld02          104               shield_large      50                255               255               255               255               255               255               elemental shield +4
 ntchan03          203               chain             30                40                15                15                40                30                30                chain mail +3: 'sage's armor' (chain mail armour)
@@ -930,6 +967,8 @@ ntplat03          208               plate             40                75      
 ntplat04          208               plate             40                75                40                40                80                75                75                Umber Hulk Plate +1
 ntrobe01          001               robe              255               255               255               255               255               255               255               robe of the evil archmagi
 ntrobe02          001               robe              255               255               255               255               255               255               255               orc shaman's cloak
+ntrobe03          001               robe              255               255               255               255               255               255               255               Robe of Rock (Mage Robe)
+ntrobe04          001               robe              255               255               255               255               255               255               255               Robe of Eyes (Mage Robe)
 ntshld01          101               shield_small      5                 255               255               255               255               255               255               small shield +2, 'shield of free action'
 ntshld02          104               shield_large      50                255               255               255               255               255               255               shield of the firewine
 ntshld03          104               shield_large      50                255               255               255               255               255               255               reinforced large shield
@@ -974,14 +1013,17 @@ palplat           209               plate_full        35                95      
 pchan             304               chain_elven       0                 20                5                 5                 10                10                10                ****
 plat01            208               plate             40                75                40                40                80                75                75                plate mail armor
 plat02            208               plate             40                75                40                40                80                75                75                plate mail +1, fallorain's plate +1 in bgee (still plate)
+plat02_           208               plate             40                75                40                40                80                75                75                plate mail +1, fallorain's plate +1 in bgee (still plate)
 plat04            209               plate_full        35                95                80                80                95                95                95                full plate mail
 plat05            209               plate_full        35                95                80                80                95                95                95                full plate mail +1, plate of the dark +1 in bgee (still full plate)
+plat05_           209               plate_full        35                95                80                80                95                95                95                full plate mail +1, plate of the dark +1 in bgee (still full plate)
 plat05xx          209               plate_full        35                95                80                80                95                95                95                warlord's sacrifice plate
 plat06            208               plate             40                75                40                40                80                75                75                ankheg plate mail
 plat06_           208               plate             40                75                40                40                80                75                75                ankheg plate mail (eet)
 plat07            208               plate             40                75                40                40                80                75                75                plate mail armor
 plat08            208               plate             40                75                40                40                80                75                75                the practical defense (plate mail)
 plat09            209               plate_full        35                95                80                80                95                95                95                mithral field plate armor +2
+plat1             208               plate             40                75                40                40                80                75                75                Absorber
 plat10            208               plate             40                75                40                40                80                75                75                plate mail +1
 plat11            208               plate             40                75                40                40                80                75                75                delver's plate +2
 plat12            208               plate             40                75                40                40                80                75                75                doomplate +3
@@ -992,12 +1034,21 @@ plat16            209               plate_full        35                95      
 plat17            208               plate             40                75                40                40                80                75                75                t'rachie's plate +5
 plat18            205               scale             25                50                20                20                60                50                50                red dragon scale
 plat19            209               plate_full        35                95                80                80                95                95                95                full plate +2
+plat1mod          209               plate_full        35                95                80                80                95                95                95                Armor of the Nine of Nevervinter
+plat2             209               plate_full        35                95                80                80                95                95                95                Hardness armor
 plat20            209               plate_full        35                95                80                80                95                95                95                blue dragon plate
 plat21            209               plate_full        35                95                80                80                95                95                95                enkidu's full plate +3
 plat22            209               plate_full        35                95                80                80                95                95                95                shuruppak's plate
 plat23            209               plate_full        35                95                80                80                95                95                95                full plate mail +2
 plat24            208               plate             40                75                40                40                80                75                75                the magma bulwark (plate mail, bgee)
+plat3             001               robe              255               255               255               255               255               255               255               Magic uniform
+plat30            208               plate             40                75                40                40                80                75                75                Royal armor
+plat4             209               plate_full        35                95                80                80                95                95                95                God's armor
+plat5             209               plate_full        35                95                80                80                95                95                95                Resistance armor
+plat7             001               robe              255               255               255               255               255               255               255               Durability uniform
 plat74            209               plate_full        35                95                80                80                95                95                95                full plate mail of unknown origin
+plat8             208               plate             40                75                40                40                80                75                75                Uniform of protection against cold
+plat9             200               leather           10                0                 255               255               0                 0                 0                 Immunity armor
 plat97            208               plate             40                75                40                40                80                75                75                plate mail armor
 plat98            208               plate             40                75                40                40                80                75                75                plate mail armor
 plat99            208               plate             40                75                40                40                80                75                75                plate mail armor
@@ -1014,6 +1065,7 @@ platds05          208               plate             40                75      
 platgr01          208               plate             40                75                40                40                80                75                75                crystal plate mail / chitinous plate mail
 platgr02          208               plate             40                75                40                40                80                75                75                plate mail of fear
 platj4            202               hide              20                60                50                50                30                20                20                trolls skin +4
+platm1            208               plate             40                75                40                40                80                75                75                Rock  (Plate Mail Armor)
 platnd            208               plate             40                75                40                40                80                75                75                plate mail armor
 platraid          208               plate             40                75                40                40                80                75                75                ****
 platred           208               plate             40                75                40                40                80                75                75                plate mail armor
@@ -1054,6 +1106,11 @@ psrobe05          001               robe              255               255     
 psrobe06          001               robe              255               255               255               255               255               255               255               robes of chaos
 psshld01          104               shield_large      50                255               255               255               255               255               255               rift shield +5
 pstalos           001               robe              255               255               255               255               255               255               255               robe of the evil archmagi
+pxbblan1          208               plate             40                75                40                40                80                75                75                Plate Mail Armor (Plate Mail Armor)
+pxbblan2          104               shield_large      50                255               255               255               255               255               255               Large Shield (Large Shield)
+pxbnoir1          209               plate_full        35                95                80                80                95                95                95                Plate Mail Armor (Plate Mail Armor)
+pxbnoir2          104               shield_large      50                255               255               255               255               255               255               Large Shield (Large Shield)
+pxlcarap          001               robe              255               255               255               255               255               255               255               Shell of Neonem the Mischievous
 r!kitplt          208               plate             40                75                40                40                80                75                75                bringer of vengeance: kitanya's plate mail (plate armour, specifically tailored for the npc)
 r!kitshd          102               shield_medium     15                255               255               255               255               255               255               mageslayer shield
 r#aspchn          304               chain_elven       0                 20                5                 5                 10                10                10                loren's chain +5
@@ -1150,6 +1207,7 @@ shark             200               leather           10                0       
 shark2            201               leather_studded   15                30                10                10                20                20                20                shark skin and coral armor (shark skin and coral armor)
 shark3            208               plate             40                75                40                40                80                75                75                coral plate armor (coral plate armor)
 shaumai           304               chain_elven       0                 20                5                 5                 10                10                10                Clan Chainmail (Clan Chainmail)
+shearm            201               leather_studded   255               30                10                10                20                20                20                Sheena's armor (allows spellcasting)
 shghost           102               shield_medium     15                255               255               255               255               255               255               ****
 shld01            101               shield_small      5                 255               255               255               255               255               255               small shield
 shld01a           101               shield_small      5                 255               255               255               255               255               255               small shield
@@ -1178,6 +1236,7 @@ shld08p           102               shield_medium     15                255     
 shld09            100               shield_buckler    5                 255               255               255               255               255               255               buckler
 shld09a           100               shield_buckler    5                 255               255               255               255               255               255               buckler
 shld09p           102               shield_medium     15                255               255               255               255               255               255               shield of devotion +1
+shld1             104               shield_large      50                255               255               255               255               255               255               Guards board  (Large Shield)
 shld10            100               shield_buckler    5                 255               255               255               255               255               255               buckler
 shld10a           100               shield_buckler    5                 255               255               255               255               255               255               buckler (human) (ppg fotd)
 shld10b           100               shield_buckler    5                 255               255               255               255               255               255               buckler (dwarf) (ppg fotd)
@@ -1213,28 +1272,35 @@ shld17a           100               shield_buckler    5                 255     
 shld18            104               shield_large      50                255               255               255               255               255               255               large shield
 shld19            104               shield_large      50                255               255               255               255               255               255               large shield +2
 shld19a           104               shield_large      50                255               255               255               255               255               255               large shield +2
+shld2             100               shield_buckler    5                 255               255               255               255               255               255               Board of the sun  (Buckler)
 shld20            100               shield_buckler    5                 255               255               255               255               255               255               kiel's buckler
 shld21            102               shield_medium     15                255               255               255               255               255               255               dragon scale shield +2
 shld22            102               shield_medium     15                255               255               255               255               255               255               sentinel +4
 shld23            104               shield_large      50                255               255               255               255               255               255               fortress shield +3
+shld23_           104               shield_large      50                255               255               255               255               255               255               fortress shield +3
 shld23a           104               shield_large      50                255               255               255               255               255               255               wall of the north +2
 shld24            101               shield_small      5                 255               255               255               255               255               255               reflection shield +1
 shld24a           101               shield_small      5                 255               255               255               255               255               255               polished shield +1
 shld25            101               shield_small      5                 255               255               255               255               255               255               shield of harmony +2
 shld26            102               shield_medium     15                255               255               255               255               255               255               shield of the lost +2
+shld26_           102               shield_medium     15                255               255               255               255               255               255               shield of the lost +2
 shld26a           102               shield_medium     15                255               255               255               255               255               255               font of virtue +2
 shld27            102               shield_medium     15                255               255               255               255               255               255               saving grace +3
+shld27_           102               shield_medium     15                255               255               255               255               255               255               saving grace +3
 shld27a           102               shield_medium     15                255               255               255               255               255               255               tahcaluss +3
 shld28            101               shield_small      5                 255               255               255               255               255               255               small shield +2
 shld28a           101               shield_small      5                 255               255               255               255               255               255               small shield +2
 shld29            102               shield_medium     15                255               255               255               255               255               255               medium shield +2
 shld29a           102               shield_medium     15                255               255               255               255               255               255               medium shield +2
+shld3             104               shield_large      50                255               255               255               255               255               255               Storm board  (Large Shield)
 shld30            104               shield_large      50                255               255               255               255               255               255               large shield +2
 shld30a           104               shield_large      50                255               255               255               255               255               255               large shield +2
 shld31            104               shield_large      50                255               255               255               255               255               255               darksteel shield +4
+shld31_           104               shield_large      50                255               255               255               255               255               255               darksteel shield +4
 shld31a           104               shield_large      50                255               255               255               255               255               255               gorm's arm +3
 shld32            102               shield_medium     15                255               255               255               255               255               255               shield of the order +4
 shld33            100               shield_buckler    5                 255               255               255               255               255               255               buckley's buckler (buckler, bgee)
+shld4             102               shield_medium     15                255               255               255               255               255               255               Belief of the paladin  (Medium Shield)
 shld51            101               shield_small      5                 255               255               255               255               255               255               small shield +2 'sun shield' (small shield)
 shld52            102               shield_medium     15                255               255               255               255               255               255               medium shield +2 (medium shield)
 shld53            102               shield_medium     15                255               255               255               255               255               255               medium shield +2 'heart of the dragon' (medium shield)
@@ -1247,6 +1313,7 @@ shldoth           101               shield_small      5                 255     
 shldraid          104               shield_large      50                255               255               255               255               255               255               ****
 shldred           102               shield_medium     15                255               255               255               255               255               255               the red knight's shield (medium shield)
 shldxz            104               shield_large      50                255               255               255               255               255               255               diamond shield
+shlmod            102               shield_medium     15                255               255               255               255               255               255               Medium Shield (Medium Shield)
 shplate           208               plate             40                75                40                40                80                75                75                shadowed plate +3 (plate mail armor)
 shrobe            001               robe              255               255               255               255               255               255               255               shadowed robe (mage robe)
 shshld            104               shield_large      50                255               255               255               255               255               255               shield of the hand (large shield)

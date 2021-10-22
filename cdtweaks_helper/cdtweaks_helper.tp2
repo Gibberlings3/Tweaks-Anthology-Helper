@@ -1,7 +1,7 @@
 BACKUP ~cdtweaks_helper/backup~ // location to store files for
 AUTHOR ~pcamagna@yahoo.com~ // email address displayed if install fails
 
-VERSION ~v2021.10.20~
+VERSION ~v2021.10.22~
 
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
@@ -32,6 +32,7 @@ END
 COPY ~weidu.log~             ~cdtweaks_helper/email_to_cam/weidu.log~
      ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/descript.log~
      ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/install.tpa~
+     ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/proposed.2da~
 
 COPY ~cdtweaks_helper/email_to_cam/common_armor_list.2da~ ~cdtweaks_helper/email_to_cam/common_armor_list.2da~
   COUNT_2DA_ROWS 11 rows
@@ -40,16 +41,7 @@ COPY ~cdtweaks_helper/email_to_cam/common_armor_list.2da~ ~cdtweaks_helper/email
     TO_LOWER item
     SET $armor("%item%") = 1
   END  
-  REPLACE_TEXTUALLY ~^\([^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]*\)$~ ~\1 ****~
   PRETTY_PRINT_2DA
-
-  REPLACE_EVALUATE 
-    ~^\([^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+\)\(.+\)$~
-    BEGIN
-      INNER_PATCH_SAVE MATCH2 ~%MATCH2%~ BEGIN
-        REPLACE_TEXTUALLY ~ +~ ~ ~
-      END
-   END ~%MATCH1%%MATCH2%~    
 
 OUTER_SET email = 0
 COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
@@ -60,8 +52,25 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
   PATCH_IF (((type = 2) OR (type = 12)) AND            // type is armor or shield
             ((flags & BIT2) = BIT2)     AND            // is flagged as droppable
             (!VARIABLE_IS_SET $armor("%item%"))) BEGIN // not already in the list
-            
     SET email = 1
+    SPRINT old_class  ~999~
+    SPRINT appearance ~unknown~
+    SET miscast = 0
+    PATCH_IF type = 12 BEGIN // shield
+      SET pick    = 255
+      SET locks   = 255
+      SET traps   = 255
+      SET move    = 255
+      SET hide    = 255
+      SET stealth = 255
+    END ELSE BEGIN // armor
+      SET pick    = 0
+      SET locks   = 0
+      SET traps   = 0
+      SET move    = 0
+      SET hide    = 0
+      SET stealth = 0
+    END  
     WRITE_SHORT 0x1c THIS + 100 // make an arbitrary change to force the copy
     SET name_spc_exists = 0
     READ_LONG 0x0c valid
@@ -83,33 +92,6 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
       READ_STRREF 0x50 desc_gen ELSE "no desc"
       SPRINT desc_spc ""
     END
-    READ_ASCII 0x22 icon (2)
-    PATCH_IF ("%icon%" STRING_COMPARE_CASE "2A" = 0) BEGIN
-      SPRINT "appear" "Leather armor"
-    END ELSE
-    PATCH_IF ("%icon%" STRING_COMPARE_CASE "3A" = 0) BEGIN
-      SPRINT "appear" "Chain mail"
-    END ELSE
-    PATCH_IF ("%icon%" STRING_COMPARE_CASE "4A" = 0) BEGIN
-      SPRINT "appear" "Plate mail"
-    END ELSE
-    PATCH_IF ("%icon%" STRING_COMPARE_REGEXP "[234]W" = 0) BEGIN
-      SPRINT "appear" "Robe"
-    END ELSE
-    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D1" = 0) BEGIN
-      SPRINT "appear" "Buckler"
-    END ELSE
-    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D2" = 0) BEGIN
-      SPRINT "appear" "Small shield"
-    END ELSE
-    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D3" = 0) BEGIN
-      SPRINT "appear" "Medium shield"
-    END ELSE
-    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D4" = 0) BEGIN
-      SPRINT "appear" "Large/Tower shield"
-    END ELSE BEGIN
-      SPRINT "appear" "Unknown"
-    END
     READ_LONG  0x6a fx_off
     READ_SHORT 0x70 fx_num
     SPRINT stlth  "Yes"
@@ -117,22 +99,161 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
     SPRINT arcne  "Yes"
     FOR (index = 0 ; index < fx_num ; ++index) BEGIN
       READ_SHORT (fx_off +        (index * 0x30)) opcode
-      READ_LONG  (fx_off + 0x08 + (index * 0x30)) button
-      PATCH_IF ((opcode = 144) AND (button = 0)) BEGIN
+      READ_LONG  (fx_off + 0x04 + (index * 0x30)) param1
+      READ_LONG  (fx_off + 0x08 + (index * 0x30)) param2
+      PATCH_IF ((opcode = 144) AND (param2 = 0)) BEGIN
         SPRINT stlth  "No"
       END
-      PATCH_IF ((opcode = 144) AND (button = 1)) BEGIN
+      PATCH_IF ((opcode = 144) AND (param2 = 1)) BEGIN
         SPRINT thving  "No"
       END
-      PATCH_IF ((opcode = 145) AND (button = 0)) BEGIN
+      PATCH_IF ((opcode = 145) AND (param2 = 0)) BEGIN
         SPRINT arcne  "No"
+        SET miscast = 255
       END
+      PATCH_IF opcode = 59 BEGIN
+        PATCH_IF param1 > 0 BEGIN SET move = 255 SET stealth = 255 END
+      END  
+      PATCH_IF opcode = 90 BEGIN
+        PATCH_IF param1 > 0 BEGIN SET locks = 255 END
+      END  
+      PATCH_IF opcode = 91 BEGIN
+        PATCH_IF param1 > 0 BEGIN SET traps = 255 END
+      END  
+      PATCH_IF opcode = 92 BEGIN
+        PATCH_IF param1 > 0 BEGIN SET pick = 255 END
+      END  
+      PATCH_IF opcode = 275 BEGIN
+        PATCH_IF param1 > 0 BEGIN SET hide = 255 END
+      END  
+    END
+    READ_LONG  0x1e usability
+    READ_ASCII 0x22 icon (2)
+    READ_LONG  0x26 min_str
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "2A" = 0) BEGIN
+      SPRINT "appear" "Leather armor"
+      PATCH_IF min_str = 4 BEGIN // assume leather
+        SPRINT old_class  ~200~
+        SPRINT appearance ~leather~
+        PATCH_IF !miscast BEGIN SET miscast = 10 END
+        PATCH_IF !locks BEGIN SET locks = 255 END
+        PATCH_IF !traps BEGIN SET traps = 255 END
+      END ELSE BEGIN             // studded leather (could be hide)
+        SPRINT old_class  ~201~
+        SPRINT appearance ~leather_studded~
+        PATCH_IF !miscast BEGIN SET miscast = 15 END
+        PATCH_IF !pick    BEGIN SET pick    = 30 END
+        PATCH_IF !locks   BEGIN SET locks   = 10 END
+        PATCH_IF !traps   BEGIN SET traps   = 10 END
+        PATCH_IF !move    BEGIN SET move    = 20 END
+        PATCH_IF !hide    BEGIN SET hide    = 20 END
+        PATCH_IF !stealth BEGIN SET stealth = 20 END
+      END  
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "3A" = 0) BEGIN
+      SPRINT "appear" "Chain mail"
+      PATCH_IF min_str = 5 BEGIN // assume elven chain
+        SPRINT old_class  ~304~
+        SPRINT appearance ~chain_elven~
+        PATCH_IF !pick    BEGIN SET pick    = 20 END
+        PATCH_IF !locks   BEGIN SET locks   =  5 END
+        PATCH_IF !traps   BEGIN SET traps   =  5 END
+        PATCH_IF !move    BEGIN SET move    = 10 END
+        PATCH_IF !hide    BEGIN SET hide    = 10 END
+        PATCH_IF !stealth BEGIN SET stealth = 10 END
+      END ELSE BEGIN             // chain
+        PATCH_IF ((usability & BIT6) = 0) BEGIN // usable by bards, assume generic chain
+          SPRINT old_class  ~203~
+          SPRINT appearance ~chain~
+          PATCH_IF !miscast BEGIN SET miscast = 30 END
+          PATCH_IF !pick    BEGIN SET pick    = 40 END
+          PATCH_IF !locks   BEGIN SET locks   = 15 END
+          PATCH_IF !traps   BEGIN SET traps   = 15 END
+          PATCH_IF !move    BEGIN SET move    = 40 END
+          PATCH_IF !hide    BEGIN SET hide    = 30 END
+          PATCH_IF !stealth BEGIN SET stealth = 30 END
+        END ELSE BEGIN // unusable by bards, assume splint  
+          SPRINT old_class  ~206~
+          SPRINT appearance ~splint~
+          PATCH_IF !miscast BEGIN SET miscast = 40 END
+          PATCH_IF !pick    BEGIN SET pick    = 40 END
+          PATCH_IF !locks   BEGIN SET locks   = 15 END
+          PATCH_IF !traps   BEGIN SET traps   = 25 END
+          PATCH_IF !move    BEGIN SET move    = 40 END
+          PATCH_IF !hide    BEGIN SET hide    = 30 END
+          PATCH_IF !stealth BEGIN SET stealth = 30 END
+        END  
+      END   
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "4A" = 0) BEGIN
+      SPRINT "appear" "Plate mail"
+      PATCH_IF min_str = 15 BEGIN // assume full plate
+        SPRINT old_class  ~209~
+        SPRINT appearance ~plate_full~
+        PATCH_IF !miscast BEGIN SET miscast = 35 END
+        PATCH_IF !pick    BEGIN SET pick    = 95 END
+        PATCH_IF !locks   BEGIN SET locks   = 80 END
+        PATCH_IF !traps   BEGIN SET traps   = 80 END
+        PATCH_IF !move    BEGIN SET move    = 95 END
+        PATCH_IF !hide    BEGIN SET hide    = 95 END
+        PATCH_IF !stealth BEGIN SET stealth = 95 END
+      END ELSE BEGIN // otherwise assume plate                
+        SPRINT old_class  ~208~
+        SPRINT appearance ~plate~
+        PATCH_IF !miscast BEGIN SET miscast = 40 END
+        PATCH_IF !pick    BEGIN SET pick    = 75 END
+        PATCH_IF !locks   BEGIN SET locks   = 40 END
+        PATCH_IF !traps   BEGIN SET traps   = 40 END
+        PATCH_IF !move    BEGIN SET move    = 80 END
+        PATCH_IF !hide    BEGIN SET hide    = 75 END
+        PATCH_IF !stealth BEGIN SET stealth = 75 END
+      END  
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_REGEXP "[234]W" = 0) BEGIN
+      SPRINT "appear" "Robe"     
+      SPRINT old_class  ~001~
+      SPRINT appearance ~robe~
+      PATCH_IF !miscast BEGIN SET miscast = 255 END
+      PATCH_IF !pick    BEGIN SET pick    = 255 END
+      PATCH_IF !locks   BEGIN SET locks   = 255 END
+      PATCH_IF !traps   BEGIN SET traps   = 255 END
+      PATCH_IF !move    BEGIN SET move    = 255 END
+      PATCH_IF !hide    BEGIN SET hide    = 255 END
+      PATCH_IF !stealth BEGIN SET stealth = 255 END
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D1" = 0) BEGIN
+      SPRINT "appear" "Buckler"     
+      SPRINT old_class  ~100~
+      SPRINT appearance ~shield_buckler~     
+      PATCH_IF !miscast BEGIN SET miscast = 5 END  
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D2" = 0) BEGIN
+      SPRINT "appear" "Small shield"
+      SPRINT old_class  ~101~
+      SPRINT appearance ~shield_small~     
+      PATCH_IF !miscast BEGIN SET miscast = 5 END  
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D3" = 0) BEGIN
+      SPRINT "appear" "Medium shield"
+      SPRINT old_class  ~102~
+      SPRINT appearance ~shield_medium~     
+      PATCH_IF !miscast BEGIN SET miscast = 15 END  
+    END ELSE
+    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D4" = 0) BEGIN
+      SPRINT "appear" "Large/Tower shield"
+      SPRINT old_class  ~104~
+      SPRINT appearance ~shield_large~     
+      PATCH_IF !miscast BEGIN SET miscast = 50 END  
+    END ELSE BEGIN
+      SPRINT "appear" "Unknown"
     END
     INNER_ACTION BEGIN
 
+APPEND_OUTER ~cdtweaks_helper/email_to_cam/proposed.2da~ ~%item%  %old_class%  %appearance%  %miscast%  %pick%  %locks%  %traps%  %move%  %hide%  %stealth%  %name_spc% (%name_gen%)~
+
 APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~
 "%WNL%%WNL%
-COPY ~cdtweaks_helper/email_to_cam/%item%.itm~ ~override~
+COPY ~%path%/%item%.itm~ ~override~
   WRITE_SHORT 0x1c THIS - 100 // undo arbitrary change
   SAY 0x08 ~%name_gen%~
   SAY 0x50 ~%desc_gen%~"
@@ -166,6 +287,17 @@ Thieving? %thving%
   BUT_ONLY
 
 ACTION_IF email BEGIN
+
+  COPY ~cdtweaks_helper/email_to_cam/proposed.2da~ ~cdtweaks_helper/email_to_cam/proposed.2da~ // clean up proposed
+    PRETTY_PRINT_2DA
+    REPLACE_EVALUATE 
+      ~^\([^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+\)\(.+\)$~
+      BEGIN
+        INNER_PATCH_SAVE MATCH2 ~%MATCH2%~ BEGIN
+          REPLACE_TEXTUALLY ~ +~ ~ ~
+        END
+     END ~%MATCH1%%MATCH2%~ 
+
   PRINT 
 ~
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
@@ -206,5 +338,13 @@ END
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 
-//BEGIN ~Cam installs locally~
-//INCLUDE ~cdtweaks/email_to_cam/install.tpa~
+/*
+BEGIN ~Cam installs locally~
+GET_DIRECTORY_ARRAY directories ~cdtweaks_helper/local~ ~.+~
+ACTION_PHP_EACH directories AS index => path BEGIN
+  ACTION_IF ("%path%" STRING_COMPARE_REGEXP "^cdtweaks_helper/local/[^.].+$" = 0) BEGIN // exclude . and ..
+    PRINT ~Installing %path% ... ~
+    INCLUDE ~%path%/install.tpa~
+  END  
+END 
+*/ 
