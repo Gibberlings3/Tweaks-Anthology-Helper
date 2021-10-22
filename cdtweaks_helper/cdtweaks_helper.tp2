@@ -19,19 +19,7 @@ NO_LOG_RECORD
 
 ACTION_IF FILE_EXISTS ~cdtweaks/2da/common_armor_list.2da~ BEGIN
 
-  OUTER_SET tweaks_version = 999 
-  COPY ~cdtweaks/setup-cdtweaks.tp2~ ~cdtweaks_helper/setup-cdtweaks.txt~ // nothing should change, but still
-    REPLACE_EVALUATE "^\(VERSION ~[Vv]?\)\([0-9]+\)" BEGIN
-      SET tweaks_version = MATCH2
-    END ~%MATCH1%%MATCH2%~  
-    PATCH_PRINT ~version is %tweaks_version%~
-    BUT_ONLY
-    
-  ACTION_IF ((IS_AN_INT tweaks_version) AND (tweaks_version > 9)) BEGIN // shouldn't be able to read in a non-int version variable, but be safe
-
-    COPY ~cdtweaks/2da/common_armor_list.2da~ ~cdtweaks_helper/email_to_cam/common_armor_list.2da~
-    
-  END  
+  COPY ~cdtweaks/2da/common_armor_list.2da~ ~cdtweaks_helper/email_to_cam/common_armor_list_tweaks.2da~
   
 END  
 
@@ -46,7 +34,10 @@ COPY ~weidu.log~             ~cdtweaks_helper/email_to_cam/weidu.log~
      ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/install.tpa~
      ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/proposed.2da~
 
-COPY ~cdtweaks_helper/email_to_cam/common_armor_list.2da~ ~cdtweaks_helper/email_to_cam/common_armor_list.2da~
+PRINT ~Stand by, building list of existing armor...
+~
+COPY ~cdtweaks_helper/email_to_cam/common_armor_list.2da~        ~cdtweaks_helper/email_to_cam/common_armor_list.2da~
+     ~cdtweaks_helper/email_to_cam/common_armor_list_tweaks.2da~ ~cdtweaks_helper/email_to_cam/common_armor_list_tweaks.2da~
   COUNT_2DA_ROWS 11 rows
   FOR (row = 1 ; row < rows ; ++row) BEGIN
     READ_2DA_ENTRY row 0 11 item
@@ -54,6 +45,7 @@ COPY ~cdtweaks_helper/email_to_cam/common_armor_list.2da~ ~cdtweaks_helper/email
     SET $armor("%item%") = 1
   END  
   PRETTY_PRINT_2DA
+  BUT_ONLY IF_EXISTS
 
 OUTER_SET email = 0
 COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
