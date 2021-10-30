@@ -1,7 +1,7 @@
 BACKUP ~cdtweaks_helper/backup~ // location to store files for
 AUTHOR ~pcamagna@yahoo.com~ // email address displayed if install fails
 
-VERSION ~v2021.10.22~
+VERSION ~v2021.10.30~
 
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
@@ -17,9 +17,9 @@ NO_LOG_RECORD
 <<<<<<<<./inline/descript.log
 >>>>>>>>
 
-ACTION_IF FILE_EXISTS ~cdtweaks/2da/common_armor_list.2da~ BEGIN
+ACTION_IF FILE_EXISTS ~cdtweaks/lib/common_armor_array.tpa~ BEGIN
 
-  COPY ~cdtweaks/2da/common_armor_list.2da~ ~cdtweaks_helper/email_to_cam/common_armor_list_tweaks.2da~
+  INCLUDE ~cdtweaks/lib/common_armor_array.tpa~
   
 END  
 
@@ -32,20 +32,15 @@ END
 COPY ~weidu.log~             ~cdtweaks_helper/email_to_cam/weidu.log~
      ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/descript.log~
      ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/install.tpa~
-     ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/proposed.2da~
+     ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/proposed.tpa~
 
-PRINT ~Stand by, building list of existing armor...
-~
-COPY ~cdtweaks_helper/email_to_cam/common_armor_list.2da~        ~cdtweaks_helper/email_to_cam/common_armor_list.2da~
-     ~cdtweaks_helper/email_to_cam/common_armor_list_tweaks.2da~ ~cdtweaks_helper/email_to_cam/common_armor_list_tweaks.2da~
-  COUNT_2DA_ROWS 11 rows
-  FOR (row = 1 ; row < rows ; ++row) BEGIN
-    READ_2DA_ENTRY row 0 11 item
-    TO_LOWER item
-    SET $armor("%item%") = 1
-  END  
-  PRETTY_PRINT_2DA
-  BUT_ONLY IF_EXISTS
+INCLUDE ~cdtweaks_helper/email_to_cam/common_armor_array.tpa~
+
+ACTION_PHP_EACH cd_common_armor_list_full AS params => item BEGIN
+
+  OUTER_SET $armor("%item%") = 1
+  
+END
 
 OUTER_SET email = 0
 COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
@@ -53,7 +48,7 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
   READ_BYTE  0x18 flags ELSE 0
   SPRINT item ~%SOURCE_RES%~
   TO_LOWER item
-  PATCH_IF (((type = 2) OR (type = 12)) AND            // type is armor or shield
+  PATCH_IF (((type = 2) OR (type = 12) OR (type = 41) OR (type = 47) OR (type = 49) OR (type = 53)) AND // type is armor (2) or shield (12 in bg, rest are iwd values)
             ((flags & BIT2) = BIT2)     AND            // is flagged as droppable
             (!VARIABLE_IS_SET $armor("%item%"))) BEGIN // not already in the list
     SET email = 1
@@ -253,7 +248,7 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
     END
     INNER_ACTION BEGIN
 
-APPEND_OUTER ~cdtweaks_helper/email_to_cam/proposed.2da~ ~%item%  %old_class%  %appearance%  %miscast%  %pick%  %locks%  %traps%  %move%  %hide%  %stealth%  %name_spc% (%name_gen%)~
+APPEND_OUTER ~cdtweaks_helper/email_to_cam/proposed.tpa~ ~"%item%",  "%old_class%",  "%appearance%",  "%miscast%",  "%pick%",  "%locks%", "%traps%",  "%move%",  "%hide%",  "%stealth%"  => "%item%" // %name_spc% (%name_gen%)~
 
 APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~
 "%WNL%%WNL%
@@ -292,15 +287,15 @@ Thieving? %thving%
 
 ACTION_IF email BEGIN
 
-  COPY ~cdtweaks_helper/email_to_cam/proposed.2da~ ~cdtweaks_helper/email_to_cam/proposed.2da~ // clean up proposed
+  COPY ~cdtweaks_helper/email_to_cam/proposed.tpa~ ~cdtweaks_helper/email_to_cam/proposed.tpa~ // clean up proposed
     PRETTY_PRINT_2DA
     REPLACE_EVALUATE 
-      ~^\([^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+[^ %TAB%]+[ %TAB%]+\)\(.+\)$~
+      ~//\(.+\)$~
       BEGIN
-        INNER_PATCH_SAVE MATCH2 ~%MATCH2%~ BEGIN
+        INNER_PATCH_SAVE MATCH1 ~%MATCH1%~ BEGIN
           REPLACE_TEXTUALLY ~ +~ ~ ~
         END
-     END ~%MATCH1%%MATCH2%~ 
+     END ~//%MATCH1%~ 
 
   PRINT 
 ~
@@ -342,7 +337,7 @@ END
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 
-/*
+
 BEGIN ~Cam installs locally~
 GET_DIRECTORY_ARRAY directories ~cdtweaks_helper/local~ ~.+~
 ACTION_PHP_EACH directories AS index => path BEGIN
@@ -351,4 +346,3 @@ ACTION_PHP_EACH directories AS index => path BEGIN
     INCLUDE ~%path%/install.tpa~
   END  
 END 
-*/ 
