@@ -6,7 +6,7 @@ call "%~dp0..\ModPackaging\utilities\ie_games.bat"
 
 REM /* MODIFY: set the values of the 3 variables below to reflect the current mod version */
 set "mod_name=Tweaks Anthology Helper"
-set mod_version=v2021.10.22
+set mod_version=v2021.10.30
 set mod_folder=cdtweaks_helper
 
 REM /* MODIFY: list here which IE games the mod is compatible with, from this list of possibilities: */
