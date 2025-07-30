@@ -68,7 +68,7 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~weidu_external/cdtweaks_helper/email_to_c
     SPRINT old_class  ~999~
     SPRINT appearance ~unknown~
     SET miscast = 0
-    PATCH_IF type = 12 BEGIN // shield
+    PATCH_IF type != 2 BEGIN // shield
       SET pick    = 255
       SET locks   = 255
       SET traps   = 255
@@ -85,18 +85,17 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~weidu_external/cdtweaks_helper/email_to_c
     END  
     WRITE_SHORT 0x1c THIS + 100 // make an arbitrary change to force the copy
     SET name_spc_exists = 0
-    READ_LONG 0x0c valid
-    PATCH_IF (valid < 2147483646) AND (valid >= 0) BEGIN
+    READ_STRREF 0x0c name_spc
+    PATCH_IF ("%name_spc%" STRING_COMPARE_REGEXP ~<Invalid Strref -?[0-9]+>~) BEGIN // checking for valid content in string
       READ_STRREF 0x08 name_gen ELSE ""
-      READ_STRREF 0x0c name_spc
       SET name_spc_exists = 1
     END ELSE BEGIN
       READ_STRREF 0x08 name_gen ELSE "no name"
       SPRINT name_spc ""
     END
     SET desc_spc_exists = 0
-    READ_LONG 0x54 valid
-    PATCH_IF (valid < 2147483646) AND (valid >= 0) BEGIN
+    READ_STRREF 0x54 desc_spc
+    PATCH_IF ("%desc_spc%" STRING_COMPARE_REGEXP ~<Invalid Strref -?[0-9]+>~) BEGIN // checking for valid content in string
       READ_STRREF 0x50 desc_gen ELSE ""
       READ_STRREF 0x54 desc_spc
       SET desc_spc_exists = 1
@@ -239,19 +238,27 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~weidu_external/cdtweaks_helper/email_to_c
       SPRINT appearance ~shield_buckler~     
       PATCH_IF !miscast BEGIN SET miscast = 5 END  
     END ELSE
-    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D2" = 0) BEGIN
+    PATCH_IF (("%icon%" STRING_COMPARE_CASE "C0" = 0) OR
+              ("%icon%" STRING_COMPARE_CASE "C4" = 0) OR
+              ("%icon%" STRING_COMPARE_CASE "D2" = 0)) BEGIN
       SPRINT "appear" "Small shield"
       SPRINT old_class  ~101~
       SPRINT appearance ~shield_small~     
       PATCH_IF !miscast BEGIN SET miscast = 5 END  
     END ELSE
-    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D3" = 0) BEGIN
+    PATCH_IF (("%icon%" STRING_COMPARE_CASE "C1" = 0) OR
+              ("%icon%" STRING_COMPARE_CASE "C3" = 0) OR
+              ("%icon%" STRING_COMPARE_CASE "C7" = 0) OR
+              ("%icon%" STRING_COMPARE_CASE "D3" = 0)) BEGIN
       SPRINT "appear" "Medium shield"
       SPRINT old_class  ~102~
       SPRINT appearance ~shield_medium~     
       PATCH_IF !miscast BEGIN SET miscast = 15 END  
     END ELSE
-    PATCH_IF ("%icon%" STRING_COMPARE_CASE "D4" = 0) BEGIN
+    PATCH_IF (("%icon%" STRING_COMPARE_CASE "C2" = 0) OR
+              ("%icon%" STRING_COMPARE_CASE "C5" = 0) OR
+              ("%icon%" STRING_COMPARE_CASE "C6" = 0) OR
+              ("%icon%" STRING_COMPARE_CASE "D4" = 0)) BEGIN
       SPRINT "appear" "Large/Tower shield"
       SPRINT old_class  ~104~
       SPRINT appearance ~shield_large~     
