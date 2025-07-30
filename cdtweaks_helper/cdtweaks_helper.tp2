@@ -1,7 +1,9 @@
-BACKUP ~cdtweaks_helper/backup~ // location to store files for
+BACKUP ~weidu_external/cdtweaks_helper/backup~ // location to store files for
 AUTHOR ~pcamagna@yahoo.com~ // email address displayed if install fails
 
-VERSION ~v2021.10.30~
+VERSION ~v2025.07.29~
+
+README ~cdtweaks_helper/readme-cdtweaks_helper.html~
 
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
@@ -11,10 +13,19 @@ VERSION ~v2021.10.30~
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 
-BEGIN ~generate armor list for Tweaks Anthology~
+BEGIN ~Generate Armor List for Tweaks Anthology~
 NO_LOG_RECORD
 
 <<<<<<<<./inline/descript.log
+%descript%
+>>>>>>>>
+
+<<<<<<<<./inline/install.tpa
+%install%
+>>>>>>>>
+
+<<<<<<<<./inline/proposed.tpa
+%proposed%
 >>>>>>>>
 
 ACTION_IF FILE_EXISTS ~cdtweaks/lib/common_armor_array.tpa~ BEGIN
@@ -25,14 +36,11 @@ END
 
 ACTION_IF FILE_EXISTS ~weidu-bgee.log~ BEGIN
 
-  COPY ~weidu-bgee.log~ ~cdtweaks_helper/email_to_cam/weidu-bgee.log~
+  COPY ~weidu-bgee.log~ ~weidu_external/cdtweaks_helper/email_to_cam/weidu-bgee.log~
   
 END  
 
-COPY ~weidu.log~             ~cdtweaks_helper/email_to_cam/weidu.log~
-     ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/descript.log~
-     ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/install.tpa~
-     ~./inline/descript.log~ ~cdtweaks_helper/email_to_cam/proposed.tpa~
+COPY ~weidu.log~             ~weidu_external/cdtweaks_helper/email_to_cam/weidu.log~
 
 INCLUDE ~cdtweaks_helper/email_to_cam/common_armor_array.tpa~
 
@@ -43,7 +51,10 @@ ACTION_PHP_EACH cd_common_armor_list_full AS params => item BEGIN
 END
 
 OUTER_SET email = 0
-COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
+OUTER_SPRINT proposed ~~
+OUTER_SPRINT install ~~
+OUTER_SPRINT descript ~~
+COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~weidu_external/cdtweaks_helper/email_to_cam~
   READ_SHORT 0x1c type  ELSE 0
   READ_BYTE  0x18 flags ELSE 0
   SPRINT item ~%SOURCE_RES%~
@@ -246,23 +257,24 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~cdtweaks_helper/email_to_cam~
     END ELSE BEGIN
       SPRINT "appear" "Unknown"
     END
-    INNER_ACTION BEGIN
+    // now update vars for logs - proposed
+    SPRINT proposed ~%proposed%%WNL%"%item%",  "%old_class%",  "%appearance%",  "%miscast%",  "%pick%",  "%locks%", "%traps%",  "%move%",  "%hide%",  "%stealth%"  => "%item%" // %name_spc% (%name_gen%)~
 
-APPEND_OUTER ~cdtweaks_helper/email_to_cam/proposed.tpa~ ~"%item%",  "%old_class%",  "%appearance%",  "%miscast%",  "%pick%",  "%locks%", "%traps%",  "%move%",  "%hide%",  "%stealth%"  => "%item%" // %name_spc% (%name_gen%)~
-
-APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~
-"%WNL%%WNL%
+    // now update vars for logs - install
+    PATCH_IF name_spc_exists BEGIN SPRINT name2 "SAY 0x0c ~%name_spc%~" END ELSE BEGIN 
+                                   SPRINT name2 ~WRITE_LONG 0x0c "-1"~ END
+    PATCH_IF desc_spc_exists BEGIN SPRINT desc2 "SAY 0x54 ~%desc_spc%~" END ELSE BEGIN 
+                                   SPRINT desc2 ~  WRITE_LONG 0x54 "-1"~ END
+    SPRINT install "%install%%WNL%%WNL%
 COPY ~%path%/%item%.itm~ ~override~
   WRITE_SHORT 0x1c THIS - 100 // undo arbitrary change
   SAY 0x08 ~%name_gen%~
-  SAY 0x50 ~%desc_gen%~"
-ACTION_IF name_spc_exists BEGIN APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~ "  SAY 0x0c ~%name_spc%~" END ELSE BEGIN 
-                                APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~ ~  WRITE_LONG 0x0c "-1"~ END
-ACTION_IF desc_spc_exists BEGIN APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~ "  SAY 0x54 ~%desc_spc%~" END ELSE BEGIN 
-                                APPEND_OUTER ~cdtweaks_helper/email_to_cam/install.tpa~ ~  WRITE_LONG 0x54 "-1"~ END
+  %name2%
+  SAY 0x50 ~%desc_gen%~
+  %desc2%"
+    // now update vars for logs - descript
   
-APPEND_OUTER ~cdtweaks_helper/email_to_cam/descript.log~
-"%WNL%%WNL%
+    SPRINT descript "%descript%%WNL%%WNL%
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
@@ -281,13 +293,14 @@ Thieving? %thving%
 %desc_gen%
 %WNL%"
 
-    END // end inner_action
   END
   BUT_ONLY
 
 ACTION_IF email BEGIN
 
-  COPY ~cdtweaks_helper/email_to_cam/proposed.tpa~ ~cdtweaks_helper/email_to_cam/proposed.tpa~ // clean up proposed
+  COPY ~./inline/descript.log~ ~weidu_external/cdtweaks_helper/email_to_cam/descript.log~ EVALUATE_BUFFER
+  COPY ~./inline/install.tpa~  ~weidu_external/cdtweaks_helper/email_to_cam/install.tpa~  EVALUATE_BUFFER
+  COPY ~./inline/proposed.tpa~ ~weidu_external/cdtweaks_helper/email_to_cam/proposed.tpa~ EVALUATE_BUFFER // clean up proposed
     PRETTY_PRINT_2DA
     REPLACE_EVALUATE 
       ~//\(.+\)$~
@@ -304,7 +317,7 @@ ACTION_IF email BEGIN
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 
 New items were found! Please zip/rar the contents of the email_to_cam 
-folder, located inside the cdtweaks_helper folder, to pcamagna@yahoo.com.
+folder, located inside the weidu_external/cdtweaks_helper folder, to pcamagna@yahoo.com.
 
 Thanks!
 
@@ -339,6 +352,7 @@ END
 
 
 BEGIN ~Cam installs locally~
+DEPRECATED ~internal use only~
 GET_DIRECTORY_ARRAY directories ~cdtweaks_helper/local~ ~.+~
 ACTION_PHP_EACH directories AS index => path BEGIN
   ACTION_IF ("%path%" STRING_COMPARE_REGEXP "^cdtweaks_helper/local/[^.].+$" = 0) BEGIN // exclude . and ..
