@@ -1,7 +1,7 @@
 BACKUP ~weidu_external/cdtweaks_helper/backup~ // location to store files for
 AUTHOR ~pcamagna@yahoo.com~ // email address displayed if install fails
 
-VERSION ~v2025.07.29~
+VERSION ~v2025.07.30~
 
 README ~cdtweaks_helper/readme-cdtweaks_helper.html~
 
@@ -31,6 +31,7 @@ NO_LOG_RECORD
 ACTION_IF FILE_EXISTS ~cdtweaks/lib/common_armor_array.tpa~ BEGIN
 
   INCLUDE ~cdtweaks/lib/common_armor_array.tpa~
+  COPY ~cdtweaks/lib/common_armor_array.tpa~ ~weidu_external/cdtweaks_helper/email_to_cam/common_armor_array_cdtweaks.tpa~
   
 END  
 
@@ -42,7 +43,8 @@ END
 
 COPY ~weidu.log~             ~weidu_external/cdtweaks_helper/email_to_cam/weidu.log~
 
-INCLUDE ~cdtweaks_helper/email_to_cam/common_armor_array.tpa~
+INCLUDE ~cdtweaks_helper/common_armor_array.tpa~
+COPY ~cdtweaks_helper/common_armor_array.tpa~ ~weidu_external/cdtweaks_helper/email_to_cam/common_armor_array_helper.tpa~
 
 ACTION_PHP_EACH cd_common_armor_list_full AS params => item BEGIN
 
