@@ -16,16 +16,12 @@ README ~cdtweaks_helper/readme-cdtweaks_helper.html~
 BEGIN ~Generate Armor List for Tweaks Anthology~
 NO_LOG_RECORD
 
-<<<<<<<<./inline/descript.log
-%descript%
->>>>>>>>
-
 <<<<<<<<./inline/install.tpa
-%install%
+//Helper version: %MOD_VERSION%%install%
 >>>>>>>>
 
-<<<<<<<<./inline/proposed.tpa
-%proposed%
+<<<<<<<<./inline/helper.csv
+%csv%
 >>>>>>>>
 
 ACTION_IF FILE_EXISTS ~cdtweaks/lib/common_armor_array.tpa~ BEGIN
@@ -41,7 +37,7 @@ ACTION_IF FILE_EXISTS ~weidu-bgee.log~ BEGIN
   
 END  
 
-COPY ~weidu.log~             ~weidu_external/cdtweaks_helper/email_to_cam/weidu.log~
+COPY ~weidu.log~ ~weidu_external/cdtweaks_helper/email_to_cam/weidu.log~
 
 INCLUDE ~cdtweaks_helper/common_armor_array.tpa~
 COPY ~cdtweaks_helper/common_armor_array.tpa~ ~weidu_external/cdtweaks_helper/email_to_cam/common_armor_array_helper.tpa~
@@ -53,9 +49,8 @@ ACTION_PHP_EACH cd_common_armor_list_full AS params => item BEGIN
 END
 
 OUTER_SET email = 0
-OUTER_SPRINT proposed ~~
 OUTER_SPRINT install ~~
-OUTER_SPRINT descript ~~
+OUTER_SPRINT csv ~~
 COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~weidu_external/cdtweaks_helper/email_to_cam~
   READ_SHORT 0x1c type  ELSE 0
   READ_BYTE  0x18 flags ELSE 0
@@ -112,13 +107,16 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~weidu_external/cdtweaks_helper/email_to_c
       READ_SHORT (fx_off +        (index * 0x30)) opcode
       READ_LONG  (fx_off + 0x04 + (index * 0x30)) param1
       READ_LONG  (fx_off + 0x08 + (index * 0x30)) param2
+      READ_ASCII (fx_off + 0x14 + (index * 0x30)) resref
       PATCH_IF ((opcode = 144) AND (param2 = 0)) BEGIN
         SPRINT stlth  "No"
       END
       PATCH_IF ((opcode = 144) AND (param2 = 1)) BEGIN
         SPRINT thving  "No"
       END
-      PATCH_IF ((opcode = 145) AND (param2 = 0)) BEGIN
+      PATCH_IF (((opcode = 145) AND (param2 = 0)) OR
+                ((opcode = 177) AND (("%resref%" STRING_COMPARE_REGEXP "[Cc]0{Aa][Rr][Cc][Aa][Ss][12]" = 0) OR       // artisan's disable spellcasting effs
+                                     ("%resref%" STRING_COMPARE_REGEXP "[Dd]5[Aa][Rr][Cc][Aa][CcLlPp]" = 0)))) BEGIN // sd's disable spellcasting effs
         SPRINT arcne  "No"
         SET miscast = 255
       END
@@ -266,58 +264,59 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~weidu_external/cdtweaks_helper/email_to_c
     END ELSE BEGIN
       SPRINT "appear" "Unknown"
     END
-    // now update vars for logs - proposed
-    SPRINT proposed ~%proposed%%WNL%"%item%",  "%old_class%",  "%appearance%",  "%miscast%",  "%pick%",  "%locks%", "%traps%",  "%move%",  "%hide%",  "%stealth%"  => "%item%" // %name_spc% (%name_gen%)~
-
-    // now update vars for logs - install
-    PATCH_IF name_spc_exists BEGIN SPRINT name2 "SAY 0x0c ~%name_spc%~" END ELSE BEGIN 
-                                   SPRINT name2 ~WRITE_LONG 0x0c "-1"~ END
-    PATCH_IF desc_spc_exists BEGIN SPRINT desc2 "SAY 0x54 ~%desc_spc%~" END ELSE BEGIN 
+    // prep strings for install/csv depending on whether name2/desc2 is set
+    PATCH_IF name_spc_exists BEGIN SPRINT name2 "SAY 0x0c ~%name_spc%~" SPRINT name_csv ~%name_spc% (%name_gen%)~ END ELSE BEGIN 
+                                   SPRINT name2 ~WRITE_LONG 0x0c "-1"~  SPRINT name_csv ~%name_gen%~ END
+    PATCH_IF desc_spc_exists BEGIN SPRINT desc2 "SAY 0x54 ~%summary%%desc_spc%~" END ELSE BEGIN 
                                    SPRINT desc2 ~  WRITE_LONG 0x54 "-1"~ END
-    SPRINT install "%install%%WNL%%WNL%
-COPY ~%path%/%item%.itm~ ~override~
-  WRITE_SHORT 0x1c THIS - 100 // undo arbitrary change
-  SAY 0x08 ~%name_gen%~
-  %name2%
-  SAY 0x50 ~%desc_gen%~
-  %desc2%"
-    // now update vars for logs - descript
-  
-    SPRINT descript "%descript%%WNL%%WNL%
-/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
-/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
-/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
-  ~%item%~ => 10000 // %name_spc% (%name_gen%)
-Equipped appearance: %appear%
+                                   
+    // compile summary to be prepended to the item description
+    SPRINT summary ~Equipped appearance: %appear%
 Cast arcane? %arcne%  
 Stealth? %stlth%  
 Thieving? %thving%
-%WNL%
-/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
-%WNL%
-%desc_spc% 
-%WNL%
-/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
-%WNL%
-%desc_gen%
-%WNL%"
+
+old class: %old_class%
+new class: %appearance%
+
+Recommended penalties:
+  miscast magic:   %miscast%
+  pickpocket:      %pick%
+  lock picking:    %locks%
+  disarm traps:    %traps%
+  move silently:   %move%
+  hide in shadows: %hide%
+  stealth:         %stealth%%WNL%%WNL%~
+  
+    // update csv for import
+    SPRINT csv ~%csv%%WNL%CDQUOTE%item%CDQUOTE,CDQUOTE%old_class%CDQUOTE,CDQUOTE%appearance%CDQUOTE,CDQUOTE%miscast%CDQUOTE,CDQUOTE%pick%CDQUOTE,CDQUOTE%locks%CDQUOTE,CDQUOTE%traps%CDQUOTE,CDQUOTE%move%CDQUOTE,CDQUOTE%hide%CDQUOTE,CDQUOTE%stealth%CDQUOTE,CDQUOTE%name_csv%CDQUOTE~
+
+    // now install for import
+    PATCH_IF name_spc_exists BEGIN SPRINT name2 "SAY 0x0c ~%name_spc%~" END ELSE BEGIN 
+                                   SPRINT name2 ~WRITE_LONG 0x0c "-1"~ END
+    PATCH_IF desc_spc_exists BEGIN SPRINT desc2 "SAY 0x54 ~%summary%%desc_spc%~" END ELSE BEGIN 
+                                   SPRINT desc2 ~  WRITE_LONG 0x54 "-1"~ END
+    SPRINT install "%install%%WNL%%WNL%
+//ACTION_IF !FILE_EXISTS_IN_GAME ~%item%.itm~ BEGIN 
+
+  COPY ~%path%/%item%.itm~ ~override~
+    WRITE_SHORT 0x1c THIS - 100 // undo arbitrary change
+    SAY 0x08 ~%name_gen%~
+    %name2%
+    SAY 0x50 ~%summary%%desc_gen%~
+    %desc2%
+    
+//END"
 
   END
   BUT_ONLY
 
 ACTION_IF email BEGIN
 
-  COPY ~./inline/descript.log~ ~weidu_external/cdtweaks_helper/email_to_cam/descript.log~ EVALUATE_BUFFER
-  COPY ~./inline/install.tpa~  ~weidu_external/cdtweaks_helper/email_to_cam/install.tpa~  EVALUATE_BUFFER
-  COPY ~./inline/proposed.tpa~ ~weidu_external/cdtweaks_helper/email_to_cam/proposed.tpa~ EVALUATE_BUFFER // clean up proposed
-    PRETTY_PRINT_2DA
-    REPLACE_EVALUATE 
-      ~//\(.+\)$~
-      BEGIN
-        INNER_PATCH_SAVE MATCH1 ~%MATCH1%~ BEGIN
-          REPLACE_TEXTUALLY ~ +~ ~ ~
-        END
-     END ~//%MATCH1%~ 
+  COPY ~./inline/install.tpa~ ~weidu_external/cdtweaks_helper/email_to_cam/install.tpa~ EVALUATE_BUFFER
+  COPY ~./inline/helper.csv~  ~weidu_external/cdtweaks_helper/email_to_cam/helper.csv~  EVALUATE_BUFFER
+    REPLACE_TEXTUALLY ~"~ ~\"~ // escape any legit quotes in names
+    REPLACE_TEXTUALLY ~CDQUOTE~ ~"~ // wrap in quotes for import
 
   PRINT 
 ~
@@ -326,7 +325,14 @@ ACTION_IF email BEGIN
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 
 New items were found! Please zip/rar the contents of the email_to_cam 
-folder, located inside the weidu_external/cdtweaks_helper folder, to pcamagna@yahoo.com.
+folder, located inside the weidu_external/cdtweaks_helper folder.
+
+Please send this file to CamDawg via:
+
+  * email: pcamagna@yahoo.com
+  * Discord: send to user camdawg_g3 or the G3 Discord at https://discord.gg/yTzjMTb
+  * G3 forum: Private message user CamDawg or post at 
+      https://www.gibberlings3.net/forums/topic/30082-tweaks-anthology-helper-tool-updated/
 
 Thanks!
 
@@ -336,7 +342,7 @@ Thanks!
 
 END ELSE BEGIN
 
-PRINT
+  PRINT
 ~
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\
@@ -362,10 +368,40 @@ END
 
 BEGIN ~Cam installs locally~
 DEPRECATED ~internal use only~
+
 GET_DIRECTORY_ARRAY directories ~cdtweaks_helper/local~ ~.+~
 ACTION_PHP_EACH directories AS index => path BEGIN
+
   ACTION_IF ("%path%" STRING_COMPARE_REGEXP "^cdtweaks_helper/local/[^.].+$" = 0) BEGIN // exclude . and ..
+  
     PRINT ~Installing %path% ... ~
+    
     INCLUDE ~%path%/install.tpa~
+    
+    ACTION_IF !FILE_EXISTS ~%path%/helper.csv~ AND FILE_EXISTS ~%path%/proposed.tpa~ BEGIN // cnovert older tpa to csv
+    
+      COPY ~%path%/proposed.tpa~ ~%path%/helper.csv~
+        REPLACE_TEXTUALLY ~^ +~ ~~
+        REPLACE_TEXTUALLY ~, +~ ~,~
+        REPLACE_TEXTUALLY ~" +=>.+"[^"]+" +//\(.+\)$~ ~","\1"~
+      
+    END  
+    
+    ACTION_IF FILE_EXISTS ~%path%/helper.csv~ BEGIN // if newer version with csv
+    
+      ACTION_IF FILE_EXISTS ~cdtweaks_helper/local/combined.csv~ BEGIN
+      
+        COPY ~cdtweaks_helper/local/combined.csv~ ~cdtweaks_helper/local/combined.csv~
+          APPEND_FILE ~%path%/helper.csv~
+          
+      END ELSE BEGIN     
+      
+        COPY ~%path%/helper.csv~ ~cdtweaks_helper/local/combined.csv~
+        
+      END  
+      
+    END   
+    
   END  
+  
 END 
