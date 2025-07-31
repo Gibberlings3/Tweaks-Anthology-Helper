@@ -1,7 +1,7 @@
 BACKUP ~weidu_external/cdtweaks_helper/backup~ // location to store files for
 AUTHOR ~pcamagna@yahoo.com~ // email address displayed if install fails
 
-VERSION ~v2025.07.30~
+VERSION ~v2025.07.31~
 
 README ~cdtweaks_helper/readme-cdtweaks_helper.html~
 
