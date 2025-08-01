@@ -1,4 +1,11 @@
 @echo off
+
+set filename=".\cdtweaks_helper\local\local.txt"
+
+if exist %filename% (
+    echo skipping packaging, local directory enabled
+) else (
+
 setlocal
 
 REM /* this initializes the values for the different variables referenced in compatible_games */
@@ -38,3 +45,5 @@ REM /* this performs the actual packaging */
 call "%~dp0..\ModPackaging\utilities\complete_packaging.bat"
 
 endlocal
+
+)
